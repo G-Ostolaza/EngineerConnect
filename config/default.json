@@ -1,0 +1,4 @@
+{
+    "mongoURI": "mongodb+srv://G-ostolaza:Iver$on03@engineerconnect.lbrgbz7.mongodb.net/?retryWrites=true&w=majority",
+    "jwtSecret": "mysecrettoken"
+}

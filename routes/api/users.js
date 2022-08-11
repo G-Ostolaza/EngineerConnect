@@ -75,9 +75,4 @@ router.post('/', [
     }
 );
 
-//     console.log('this is req body', req.body);
-//     res.send('User Route')
-
-
-
 module.exports = router;

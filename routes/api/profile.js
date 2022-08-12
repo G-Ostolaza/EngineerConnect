@@ -1,11 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
 const auth = require('../../middleware/auth');
-const Profile = require("../../models/Profile");
-const User = require("../../models/User");
-const { check, validationResult } = require("express-validator");
+const Profile = require('../../models/Profile');
+const User = require('../../models/User');
+const { check, validationResult } = require('express-validator');
 
+//////////////GET ROUTES///////////////////
+
+//@Route  GET api/profiles
+//@desc   Get All Profiles
+//@access Public
+
+router.get('/', async (req, res) => {
+    try {
+        const profiles = await Profile.find().populate('user', ['name', 'avatar']);
+        res.json(profiles);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(400).send('Server Error');
+    }
+});
 
 //@Route  GET api/profile/me
 //@desc   Get Current Users Profile
@@ -16,20 +31,37 @@ router.get('/me', auth, async (req, res) => {
         const profile = await Profile.findOne({ user: req.user.id }).populate('user', ['name', 'avatar']);
 
         if (!profile) {
-            return res
-                .status(400)
-                .json({ msg: "There is no profile for this user" });
+            return res.status(400).json({ msg: 'There is no profile for this user' });
         }
         res.json(profile);
     }
     catch {
         console.error(err.message);
-        res
-            .status(500)
-            .send('Server Error');
+        res.status(500).send('Server Error');
     }
 });
 
+//@Route  GET api/profile/user/:user_id
+//@desc   Get Profile by user ID
+//@access Public
+
+router.get('/user/:user_id', async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.params.user_id }).populate('user', ['name', 'avatar']);
+
+        if (!profile) res.status(400).json({ msg: 'There is no profile found' });
+
+        res.json(profile);
+    } catch (err) {
+        console.error(err.message);
+        if(err.kind == 'ObjectId') {
+            return res.status(400).json( {msg: 'there is no profile found' } )
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+//////////////POST ROUTES///////////////////
 
 //@Route  POST api/profile
 //@desc   Create or update user profile
@@ -103,30 +135,14 @@ router.post('/', [auth, [
             profile = new Profile(profileFields);
             await profile.save();
             res.json(profile);
-
         }
         catch (err) {
             console.error(err.message);
             res.status(500).send('Server Error')
         }
-
     })
 
-//@Route  GET api/profiles
-//@desc   Get All Profiles
-//@access Public
 
-router.get('/', async (req,res) => {
-    try {
-        const profiles = await Profile.find().populate('user',['name','avatar']);
-        res.json(profiles);
-        
-    } catch (err) {
-        console.error(err.message);
-        res.status(400).send('Server Error');
-        
-    }
-})
 
 
 
